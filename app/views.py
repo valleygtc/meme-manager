@@ -8,6 +8,15 @@ DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 bp_main = Blueprint('bp_main', __name__)
 
 
+@bp_main.after_app_request
+def disable_CORS(response):
+    response.headers['Access-Control-Allow-Headers'] = 'content-type'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    origin = request.headers.get('Origin')
+    response.headers['Access-Control-Allow-Origin'] = origin
+    return response
+
+
 # images
 """/images/
 GET

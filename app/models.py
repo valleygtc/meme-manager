@@ -5,7 +5,7 @@ from . import db
 
 class Image(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    data = db.Column(db.LargeBinary(), nullable=False)
+    data = db.Column(db.LargeBinary(length=2**24-1), nullable=False) # max size: 16MB
     img_type = db.Column(db.String(64), nullable=False)
     tags = db.Column(db.Text(), nullable=False)
     create_at = db.Column(db.DateTime(), nullable=False, server_default=func.now())
@@ -20,6 +20,8 @@ class Image(db.Model):
         for k in keys:
             if k == 'create_at':
                 v = getattr(self, k).strftime(datetime_format)
+            elif k == 'tags':
+                v = getattr(self, k).split(',')
             else:
                 v = getattr(self, k)
             d[k] = v
