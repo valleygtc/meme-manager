@@ -14,7 +14,7 @@ def import_from_dir(path):
         if img.is_file():
             count += 1
             img_data = img.read_bytes()
-            img_type = img.suffix
+            img_type = img.suffix[1:]
             tags = img.stem
             record = Image(
                 data=img_data,
