@@ -1,0 +1,4 @@
+flask
+flask-sqlalchemy
+mysql-connector-python
+waitress
