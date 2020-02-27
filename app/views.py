@@ -23,6 +23,8 @@ GET
 分页后端实现，使用url参数?page=[int]&per_page=[int]
 - page: 可选，默认为 1。
 - per_page：可选，默认为 20。
+搜索：后端实现，使用 url 参数，可搜索项：tag。
+- tag: [str]
 resp: 200, body:
 {
     "data": [
@@ -50,11 +52,22 @@ content-type: image/<img_type>
 @bp_main.route('/images/', methods=['GET'])
 def show_images():
     image_id = request.args.get('id')
-    if image_id is None:
+    if image_id:
+        image = Image.query.get(image_id)
+        response = Response(image.data, mimetype=f'image/{image.img_type}')
+        return response
+    else:
+        # apply search
+        tag = request.args.get('tag')
+        if tag:
+            query = Image.query.filter(Image.tags.contains(tag))
+        else:
+            query = Image.query
+        # apply pagination
         DEFAULT_PER_PAGE = 20
         page = int(request.args.get('page', default=1))
         per_page = int(request.args.get('per_page', default=DEFAULT_PER_PAGE))
-        paginate = Image.query.order_by(Image.create_at)\
+        paginate = query.order_by(Image.create_at)\
                         .paginate(page=page, per_page=per_page)
 
         columns = ('id', 'img_type', 'tags', 'create_at')
@@ -69,10 +82,7 @@ def show_images():
             }
         }
         return jsonify(response)
-    else:
-        image = Image.query.get(image_id)
-        response = Response(image.data, mimetype=f'image/{image.img_type}')
-        return response
+        
 
 
 """/images/add
