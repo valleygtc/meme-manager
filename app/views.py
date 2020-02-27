@@ -20,6 +20,9 @@ def disable_CORS(response):
 # images
 """/images/
 GET
+分页后端实现，使用url参数?page=[int]&per_page=[int]
+- page: 可选，默认为 1。
+- per_page：可选，默认为 20。
 resp: 200, body:
 {
     "data": [
@@ -31,6 +34,12 @@ resp: 200, body:
         },
         ...
     ]
+    "pagination": {
+        'pages': [Number], # 总页数
+        'page': [Number], # 当前页码
+        'per_page': [Number], # 每页条数（行数）
+        'total': [Number] # 总条数（行数）
+    }
 }
 
 GET id=[int]
@@ -42,12 +51,22 @@ content-type: image/<img_type>
 def show_images():
     image_id = request.args.get('id')
     if image_id is None:
-        images = Image.query.order_by(Image.create_at).all()
+        DEFAULT_PER_PAGE = 20
+        page = int(request.args.get('page', default=1))
+        per_page = int(request.args.get('per_page', default=DEFAULT_PER_PAGE))
+        paginate = Image.query.order_by(Image.create_at)\
+                        .paginate(page=page, per_page=per_page)
 
         columns = ('id', 'img_type', 'tags', 'create_at')
 
         response = {
-            'data': [record.readyToJSON(columns, DATETIME_FORMAT) for record in images]
+            'data': [record.readyToJSON(columns, DATETIME_FORMAT) for record in paginate.items],
+            'pagination': {
+                'pages': paginate.pages,
+                'page': paginate.page,
+                'per_page': paginate.per_page,
+                'total': paginate.total,
+            }
         }
         return jsonify(response)
     else:

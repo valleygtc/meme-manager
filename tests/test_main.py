@@ -48,6 +48,18 @@ class TestImageShow(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.mimetype, 'image/jpeg')
         self.assertEqual(resp.headers.get('Content-Type'), 'image/jpeg')
+    
+    def test_pagination(self):
+        client = test_app.test_client()
+        resp = client.get(self.url, query_string={
+            'page': 2,
+            'per_page': 10,
+        })
+        self.assertEqual(resp.status_code, 200)
+        json_data = resp.get_json()
+        self.assertIn('data', json_data)
+        self.assertIn('pagination', json_data)
+        self.assertEqual(len(json_data['data']), 10)
 
 
 class TestImageAdd(unittest.TestCase):
