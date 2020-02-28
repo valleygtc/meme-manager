@@ -8,7 +8,11 @@ db = SQLAlchemy()
 
 
 def create_app(config_name='production'):
-    app = Flask(__name__)
+    app = Flask(
+        __name__,
+        static_folder='frontend',
+        static_url_path='',
+    )
     config = configs[config_name]
     app.config.from_object(config)
     config.init_app(app)

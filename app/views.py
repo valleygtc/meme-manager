@@ -49,7 +49,7 @@ resp: 200, body:
 content-type: image/<img_type>
 图片二进制数据
 """
-@bp_main.route('/images/', methods=['GET'])
+@bp_main.route('/api/images/', methods=['GET'])
 def show_images():
     image_id = request.args.get('id')
     if image_id:
@@ -95,7 +95,7 @@ Content-Type: multipart/form-data
 }
 resp: 200, body: {"msg": [String]}
 """
-@bp_main.route('/images/add', methods=['POST'])
+@bp_main.route('/api/images/add', methods=['POST'])
 def add_image():
     image_file = request.files['image']
     image_data = image_file.read()
@@ -117,7 +117,7 @@ def add_image():
 GET ?id=[Number]
 resp: 200, body: {"msg": [String]}
 """
-@bp_main.route('/images/delete', methods=['GET'])
+@bp_main.route('/api/images/delete', methods=['GET'])
 def delete_image():
     image_id = int(request.args.get('id'))
     image = Image.query.get(image_id)
@@ -142,7 +142,7 @@ resp: 200, body:
     "data": [Array[String]]
 }
 """
-@bp_main.route('/tags/', methods=['GET'])
+@bp_main.route('/api/tags/', methods=['GET'])
 def show_tags():
     image_id = int(request.args.get('image_id'))
     image = Image.query.get(image_id)
@@ -165,7 +165,7 @@ POST {
 }
 resp: 200, body: {"msg": [String]}
 """
-@bp_main.route('/tags/add', methods=['POST'])
+@bp_main.route('/api/tags/add', methods=['POST'])
 def add_tags():
     data = request.get_json()
     image_id = data['image_id']
@@ -186,7 +186,7 @@ POST {
 }
 resp: 200, body: {"msg": [String]}
 """
-@bp_main.route('/tags/delete', methods=['POST'])
+@bp_main.route('/api/tags/delete', methods=['POST'])
 def delete_tag():
     data = request.get_json()
     image_id = data['image_id']

@@ -32,14 +32,14 @@ $ python run.py
 # API
 ```
 Endpoint              Methods  Rule
---------------------  -------  -----------------------
-bp_main.add_image     POST     /images/add
-bp_main.add_tags      POST     /tags/add
-bp_main.delete_image  GET      /images/delete
-bp_main.delete_tag    POST     /tags/delete
-bp_main.show_images   GET      /images/
-bp_main.show_tags     GET      /tags/
-static                GET      /static/<path:filename>
+--------------------  -------  ------------------
+bp_main.add_image     POST     /api/images/add
+bp_main.add_tags      POST     /api/tags/add
+bp_main.delete_image  GET      /api/images/delete
+bp_main.delete_tag    POST     /api/tags/delete
+bp_main.show_images   GET      /api/images/
+bp_main.show_tags     GET      /api/tags/
+static                GET      /<path:filename>
 ```
 
 - [前后端接口格式规定](./interface.md)
