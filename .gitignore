@@ -12,7 +12,7 @@ __pycache__/
 
 .vscode/
 
+src/meme_manager/frontend/*
 log/
 env.sh
 *.sqlite
-app/frontend/*
