@@ -58,10 +58,18 @@ $ python -m unittest discover
 见：https://github.com/valleygtc/meme-manager-frontend
 
 # 构建与发布：
+prerequsite：
+```
+$ pip install --user --upgrade setuptools wheel
+
+$ pipx install twine
+```
+
+build and upload to pypi:
 ```bash
 # build
 $ python3 setup.py sdist bdist_wheel
 
 # upload to pypi
-$ python3 -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+$ twine upload dist/*
 ```
