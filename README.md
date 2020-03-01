@@ -41,7 +41,7 @@ $ cd meme-manager
 $ python3 -m venv .venv
 $ source .venv/bin/activate
 # install meme-manager and its dependencies.
-$ python setup.py
+$ pip install --editable .
 
 # ENV
 $ cp env.sh.example env.sh
@@ -67,6 +67,9 @@ $ pipx install twine
 
 build and upload to pypi:
 ```bash
+# 首先要 build 前端。
+# 然后把前端 build 出来的 build/ 目录复制到 src/meme-manager 目录下，并改名为 frontend。
+
 # build
 $ python3 setup.py sdist bdist_wheel
 
