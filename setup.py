@@ -37,14 +37,11 @@ setup(
     #     'test': ['coverage'],
     # },
 
-    # If there are data files included in your packages that need to be
-    # installed, specify them here.
-    #
-    # If using Python 2.6 or earlier, then these have to be included in
-    # MANIFEST.in as well.
-    # package_data={  # Optional
-    #     'sample': ['package_data.dat'],
-    # },
+    # setuptools not support "**" rescursive include sub directory. so I have to specify every sub dir.
+    # ref: https://github.com/pypa/setuptools/issues/1806
+    package_data={
+        'meme_manager': ['frontend/*', 'frontend/static/css/*', 'frontend/static/js/*'],
+    },
 
     # Although 'package_data' is the preferred approach, in some case you may
     # need to place data files outside of your packages. See:
@@ -58,17 +55,7 @@ setup(
             'meme-manager=meme_manager:cli',
         ],
     },
-
-    # List additional URLs that are relevant to your project as a dict.
-    #
-    # This field corresponds to the "Project-URL" metadata fields:
-    # https://packaging.python.org/specifications/core-metadata/#project-url-multiple-use
-    #
-    # Examples listed include a pattern for specifying where the package tracks
-    # issues, where the source is hosted, where to say thanks to the package
-    # maintainers, and where to support the project financially. The key is
-    # what's used to render the link text on PyPI.
-    project_urls={  # Optional
+    project_urls={
         'Bug Reports': 'https://github.com/valleygtc/meme-manager/issues',
         'Source': 'https://github.com/valleygtc/meme-manager/',
     },
