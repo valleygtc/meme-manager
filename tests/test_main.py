@@ -3,8 +3,8 @@ import sys
 import json
 from io import BytesIO
 
-from app import db
-from app.models import Image
+from meme_manager import db
+from meme_manager.models import Image
 
 from tests import test_app
 
@@ -21,7 +21,7 @@ def fake_records(n):
 
 
 class TestImageShow(unittest.TestCase):
-    url = '/images/'
+    url = '/api/images/'
 
     def setUp(self):
         with test_app.app_context():
@@ -63,7 +63,7 @@ class TestImageShow(unittest.TestCase):
 
 
 class TestImageAdd(unittest.TestCase):
-    url = '/images/add'
+    url = '/api/images/add'
 
     data = {
         'image': (BytesIO(b'added image data'), 'test_image.jpeg'),
@@ -97,7 +97,7 @@ class TestImageAdd(unittest.TestCase):
 
 
 class TestImageDelete(unittest.TestCase):
-    url = '/images/delete'
+    url = '/api/images/delete'
 
     def setUp(self):
         with test_app.app_context():
@@ -133,7 +133,7 @@ class TestImageDelete(unittest.TestCase):
 
 
 class TestTagsShow(unittest.TestCase):
-    url = '/tags/'
+    url = '/api/tags/'
 
     def setUp(self):
         with test_app.app_context():
@@ -156,7 +156,7 @@ class TestTagsShow(unittest.TestCase):
 
 
 class TestTagsAdd(unittest.TestCase):
-    url = '/tags/add'
+    url = '/api/tags/add'
 
     data = {
         'image_id': 1,
@@ -187,7 +187,7 @@ class TestTagsAdd(unittest.TestCase):
 
 
 class TestTagDelete(unittest.TestCase):
-    url = '/tags/delete'
+    url = '/api/tags/delete'
 
     data = {
         'image_id': 1,
