@@ -1,51 +1,67 @@
 # 简介
-表情包管理器后端
+Web UI 表情包管理器。
 
+功能：
+- 浏览图片。
+- 添加、删除图片。
+- 给图片打标签，并可以按标签搜索。
 
-# 部署
+# 安装：
+```
+$ pipx install meme-manager
+```
+
+验证安装成功：
+```
+$ meme-manager --help
+```
+
+# 使用：
 ```bash
-$ git clone <repo>
-$ cd meme-manager-backend
+# 初始化 sqlite 数据库：
+$ meme-manager init_db foo.sqlite
 
+# 运行：
+$ meme-manager run foo.sqlite
+
+# 打开浏览器，在地址栏输入：http://localhost:5000/index.html
+```
+
+# 开发：
+说明：
+后端使用 Python Flask + waitress 开发。
+前端使用 React + Antd 开发。
+
+后端：
+```bash
+$ git clone https://github.com/valleygtc/meme-manager.git
+$ cd meme-manager
+
+# create venv
 $ python3 -m venv .venv
 $ source .venv/bin/activate
-$ pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple # 清华pypi镜像。
+# install meme-manager and its dependencies.
+$ python setup.py
 
+# ENV
 $ cp env.sh.example env.sh
 $ vi env.sh # 填写好程序运行所需环境变量。
-
 $ source env.sh # 读入环境变量。
-$ flask create_table # 创建数据库表。
 
-$ python run.py
+
+$ flask run
+$ python -m unittest discover
 ```
 
+前端：
 
-# 依赖说明
-- Flask 框架
-- DB：
-  - ORM: Flask-SQLAlchemy
-  - MySQL + mysql-connector-python
-- 部署： waitress
+见：https://github.com/valleygtc/meme-manager-frontend
 
+# 构建与发布：
+```bash
+# build
+$ python3 setup.py sdist bdist_wheel
 
-# API
+# upload to pypi
+$ python3 -m twine upload --repository-url https://test.pypi.org/legacy/ dist/*
 ```
-Endpoint              Methods  Rule
---------------------  -------  ------------------
-bp_main.add_image     POST     /api/images/add
-bp_main.add_tags      POST     /api/tags/add
-bp_main.delete_image  GET      /api/images/delete
-bp_main.delete_tag    POST     /api/tags/delete
-bp_main.show_images   GET      /api/images/
-bp_main.show_tags     GET      /api/tags/
-static                GET      /<path:filename>
-```
-
-- [前后端接口格式规定](./interface.md)
-- 各个接口具体格式见view.py中的每个**视图函数上方的注释**。
-
-
-# 开发说明：
-- flask debug server: `$ flask run [--host=0.0.0.0]`
-- unittest: `python -m unittest discover`

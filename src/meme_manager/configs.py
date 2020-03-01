@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 import sys
 import logging
 from logging.handlers import TimedRotatingFileHandler
@@ -6,7 +6,7 @@ from logging.handlers import TimedRotatingFileHandler
 
 class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI')
+    SQLALCHEMY_DATABASE_URI = f'sqlite:///{Path.cwd().joinpath("memes.sqlite")}'
 
     @classmethod
     def init_app(cls, app):

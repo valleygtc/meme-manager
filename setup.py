@@ -18,7 +18,7 @@ setup(
     author_email='gutianci@qq.com',
     classifiers=[
         'Development Status :: 3 - Alpha',
-        'Environment :: Web Environment'
+        'Environment :: Web Environment',
         'Intended Audience :: End Users/Desktop',
         'Topic :: Desktop Environment',
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
