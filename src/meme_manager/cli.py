@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+import webbrowser
 
 import click
 from waitress import serve
@@ -41,6 +42,7 @@ def run(port, db_file):
 
     app = create_app(os.getenv('FLASK_ENV', 'production'))
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{fp}'
+    webbrowser.open(f'http://127.0.0.1:{port}/index.html')
     serve(app, host='127.0.0.1', port=port)
 
 
