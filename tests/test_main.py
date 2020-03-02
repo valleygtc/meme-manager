@@ -3,8 +3,7 @@ import sys
 import json
 from io import BytesIO
 
-from meme_manager import db
-from meme_manager.models import Image
+from meme_manager import db, Image
 
 from tests import test_app
 
