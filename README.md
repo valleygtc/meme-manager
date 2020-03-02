@@ -43,14 +43,17 @@ $ source .venv/bin/activate
 # install meme-manager and its dependencies.
 $ pip install --editable .
 
+# run unittest
+$ python -m unittest discover
+
 # ENV
 $ cp env.sh.example env.sh
 $ vi env.sh # 填写好程序运行所需环境变量。
 $ source env.sh # 读入环境变量。
 
-
+$ meme-manager init_db
+# init_db memes.sqlite
 $ flask run
-$ python -m unittest discover
 ```
 
 前端：
