@@ -75,6 +75,7 @@ def import_from_dir(src_path):
             count += 1
             record = file2record(file)
             db.session.add(record)
+            print(f'Add {file} done.')
     db.session.commit()
     return count
 
@@ -104,7 +105,7 @@ def import_(src, db_file):
     elif src_path.is_dir():
         with app.app_context():
             count = import_from_dir(src_path)
-            print(f'Add {count} images done.')
+            print(f'Total add {count} images.')
     else:
         print(f'Error: {src_path} is not a regular file nor a directory.')
         return
