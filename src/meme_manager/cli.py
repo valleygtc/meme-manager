@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import webbrowser
+import uuid
 
 import click
 from waitress import serve
@@ -109,3 +110,46 @@ def import_(src, db_file):
     else:
         print(f'Error: {src_path} is not a regular file nor a directory.')
         return
+
+
+@cli.command('export')
+@click.argument('db_file')
+@click.argument('dest')
+def import_(db_file, dest):
+    """Export db images to a directory"""
+    db_path = Path(db_file).resolve().absolute()
+    dest_path = Path(dest)
+    if not db_path.exists():
+        print(f'Error: {db_path} not exists.')
+        return
+    if not dest_path.exists():
+        print(f'Error: {dest_path} not exists.')
+        return
+    if not dest_path.is_dir():
+        print(f'Error: {dest_path} is not a directory.')
+        return
+
+    app = create_app(os.getenv('FLASK_ENV', 'production'))
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
+    ok_count = 0
+    fail_count = 0
+    with app.app_context():
+        for record in Image.query.all():
+            filename = record.tags.split(',')[0]
+            if not filename:
+                filename = str(uuid.uuid4())
+
+            filename += f'.{record.img_type}'
+            filepath = dest_path.joinpath(filename)
+            try:
+                with open(filepath, 'wb') as fh:
+                    fh.write(record.data)
+            except OSError:
+                print(f'Error: {filename} write failed.')
+                fail_count += 1
+            else:
+                print(f'export {filename} done.')
+                ok_count +=1
+    print(f'Total export {ok_count + fail_count} images.')
+    print(f'Success: {ok_count}')
+    print(f'Failed: {fail_count}')
