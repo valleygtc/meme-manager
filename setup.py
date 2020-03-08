@@ -7,9 +7,13 @@ here = path.abspath(path.dirname(__file__))
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
 
+meta = {}
+with open(path.join(here, 'src/meme_manager/version.py'), encoding='utf-8') as f:
+    exec(f.read(), meta)
+
 setup(
     name='meme-manager',
-    version='0.1.0',
+    version=meta['__version__'],
     description='A meme manager with web UI',
     long_description=long_description,
     long_description_content_type='text/markdown',

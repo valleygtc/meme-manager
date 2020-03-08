@@ -5,11 +5,13 @@ import webbrowser
 import click
 from waitress import serve
 
+from .version import __version__
 from .create_app import create_app
 from .models import db, Image
 
 
 @click.group()
+@click.version_option(__version__)
 def cli():
     """meme-manager cli."""
 
