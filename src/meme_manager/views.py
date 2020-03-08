@@ -1,4 +1,4 @@
-from flask import Blueprint, json, jsonify, request, make_response, Response
+from flask import Blueprint, json, jsonify, request, Response
 
 from . import db
 from .models import Image, Group
@@ -123,9 +123,9 @@ def delete_image():
     image = Image.query.get(image_id)
     if image is None:
         err = f'图片（id={image_id}）不存在，可能是其已被删除，请刷新页面。'
-        return make_response(jsonify({
+        return jsonify({
             'error': err
-        }), 404)
+        }), 404
     else:
         db.session.delete(image)
         db.session.commit()
@@ -148,9 +148,9 @@ def show_tags():
     image = Image.query.get(image_id)
     if image is None:
         err = f'图片（id={image_id}）不存在，可能是其已被删除，请刷新页面。'
-        return make_response(jsonify({
+        return jsonify({
             'error': err
-        }), 404)
+        }), 404
 
     response = {
         'data': image.tags.split(','),
