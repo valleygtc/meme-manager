@@ -1,7 +1,7 @@
 from flask import Blueprint, json, jsonify, request, make_response, Response
 
 from . import db
-from .models import Image
+from .models import Image, Group
 
 DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
@@ -197,4 +197,82 @@ def delete_tag():
     db.session.commit()
     return jsonify({
         'msg': f'成功删除标签：{data}'
+    })
+
+
+# group
+"""/groups/
+GET
+resp: 200, body:
+{
+    "data": [Array[String]]
+}
+"""
+@bp_main.route('/api/groups/', methods=['GET'])
+def show_groups():
+    groups = Group.query.order_by(Group.name).all()
+    resp = {
+        'data': [r.name for r in groups],
+    }
+    return jsonify(resp)
+
+
+"""/groups/add
+POST {
+    "name": [String],
+}
+resp: 200, body: {"msg": [String]}
+"""
+@bp_main.route('/api/groups/add', methods=['POST'])
+def add_group():
+    data = request.get_json()
+    name = data['name']
+    record = Group(name=name)
+    db.session.add(record)
+    db.session.commit()
+    return jsonify({
+        'msg': f'成功添加组：{record}'
+    })
+
+
+"""/groups/delete
+POST {
+    "id": [Number],
+}
+resp: 200, body: {"msg": [String]}
+"""
+@bp_main.route('/api/groups/delete', methods=['POST'])
+def delete_group():
+    data = request.get_json()
+    id_ = data['id']
+    group = Group.query.get(id_)
+    if group is None:
+        err = f'组（id={id_}）不存在，可能是其已被删除，请刷新页面。'
+        return jsonify({
+            'error': err
+        }), 404
+    else:
+        db.session.delete(group)
+        db.session.commit()
+        return jsonify({
+            'msg': f'成功删除组（id={id_}）'
+        })
+
+
+"""/groups/update
+POST {
+    "id": [Number],
+    "name": [String]
+}
+resp: 200, body: {"msg": [String]}
+"""
+@bp_main.route('/api/groups/update', methods=['POST'])
+def update_group():
+    data = request.get_json()
+    id_ = data['id']
+    group = Group.query.get(id_)
+    group.name = data['name']
+    db.session.commit()
+    return jsonify({
+        'msg': f'成功更新组：{group}'
     })

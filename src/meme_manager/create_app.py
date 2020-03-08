@@ -16,11 +16,11 @@ def create_app(config_name='production'):
     from .views import bp_main
     app.register_blueprint(bp_main)
 
-    from .models import db, Image
+    from .models import db, Image, Group
     db.init_app(app)
 
     def make_shell_context():
-        return dict(db=db, Image=Image)
+        return dict(db=db, Image=Image, Group=Group)
 
     app.shell_context_processor(make_shell_context)
 
