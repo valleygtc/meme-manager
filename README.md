@@ -19,7 +19,7 @@ $ meme-manager --help
 # 使用：
 ```bash
 # 初始化 sqlite 数据库：
-$ meme-manager init_db foo.sqlite
+$ meme-manager initdb foo.sqlite
 
 # 运行：
 $ meme-manager run foo.sqlite
@@ -51,8 +51,10 @@ $ cp env.sh.example env.sh
 $ vi env.sh # 填写好程序运行所需环境变量。
 $ source env.sh # 读入环境变量。
 
-$ meme-manager init_db
-# init_db memes.sqlite
+# init db memes.sqlite
+$ meme-manager initdb
+
+# run on db memes.sqlite
 $ flask run
 ```
 

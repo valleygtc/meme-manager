@@ -17,9 +17,9 @@ def cli():
     """meme-manager cli."""
 
 
-@cli.command('init_db')
+@cli.command('initdb')
 @click.argument('db_file', default='memes.sqlite')
-def init_db(db_file):
+def initdb(db_file):
     """Initialize sqlite database file."""
     fp = Path(db_file).resolve().absolute()
     if fp.exists():
