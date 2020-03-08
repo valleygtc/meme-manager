@@ -115,7 +115,7 @@ def import_(src, db_file):
 @cli.command('export')
 @click.argument('db_file')
 @click.argument('dest')
-def import_(db_file, dest):
+def export_(db_file, dest):
     """Export db images to a directory"""
     db_path = Path(db_file).resolve().absolute()
     dest_path = Path(dest)
