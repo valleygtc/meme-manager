@@ -85,7 +85,7 @@ def import_from_dir(src_path):
 @click.argument('src')
 @click.argument('db_file')
 def import_(src, db_file):
-    """Import image file or directory"""
+    """Import image file or directory."""
     src_path = Path(src)
     db_path = Path(db_file).resolve().absolute()
     if not src_path.exists():
@@ -116,7 +116,7 @@ def import_(src, db_file):
 @click.argument('db_file')
 @click.argument('dest')
 def export_(db_file, dest):
-    """Export db images to a directory"""
+    """Export db images to a directory."""
     db_path = Path(db_file).resolve().absolute()
     dest_path = Path(dest)
     if not db_path.exists():
