@@ -6,7 +6,7 @@ db = SQLAlchemy()
 
 class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64))
+    name = db.Column(db.String(64), unique=True)
     create_at = db.Column(db.DateTime(), nullable=False, server_default=func.now())
 
     def __repr__(self):

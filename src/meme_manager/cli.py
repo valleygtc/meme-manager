@@ -123,7 +123,6 @@ def import_struct_dir(dir_):
             fcount += 1
             print(f'Add image {p} done.')
         elif p.is_dir():
-            print(f'Group: {p.name}')
             fc = import_flat_dir(p, p.name)
             gcount += 1
             fcount += fc
@@ -194,16 +193,26 @@ def export_(db_file, dest):
     ok_count = 0
     fail_count = 0
     with app.app_context():
-        for record in Image.query.all():
-            filename = record.tags.split(',')[0]
-            if not filename:
-                filename = str(uuid.uuid4())
+        # groups
+        for group in Group.query.all():
+            dir_ = dest_path/group.name
+            if dir_.exists():
+                print(f'Error: {dir_} already exists.')
+                return
 
-            filename += f'.{record.img_type}'
-            filepath = dest_path.joinpath(filename)
+            try:
+                dir_.mkdir()
+            except OSError as e:
+                print(f'Error: {e}')
+
+        # images
+        for image in Image.query.all():
+            filename = image.tags.split(',')[0] or str(uuid.uuid4())
+            filename += f'.{image.img_type}'
+            filepath = dest_path/image.group.name/filename if image.group else dest_path/filename
             try:
                 with open(filepath, 'wb') as fh:
-                    fh.write(record.data)
+                    fh.write(image.data)
             except OSError:
                 print(f'Error: {filename} write failed.')
                 fail_count += 1
