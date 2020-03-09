@@ -183,6 +183,19 @@ def image2filename(image):
     return filename
 
 
+def assert_safe_filepath(filepath):
+    """if filepath exists, generate a uuid filename replact it.
+    Params:
+        filepath [Path]
+    Return:
+        filepath [Path]
+    """
+    if filepath.exists():
+        return filepath.with_name(str(uuid.uuid4()) + filepath.suffix)
+    else:
+        return filepath
+
+
 def export_group(dest_dir, group):
     """
     Params:
@@ -212,14 +225,15 @@ def export_group(dest_dir, group):
     for image in grecord.images:
         filename = image2filename(image)
         filepath = group_dir/filename
+        filepath = assert_safe_filepath(filepath)
         try:
             with open(filepath, 'wb') as fh:
                 fh.write(image.data)
         except OSError:
-            print(f'Error: {filename} write failed.')
+            print(f'Error: {filepath} write failed.')
             fail_count += 1
         else:
-            print(f'export {filename} done.')
+            print(f'export {filepath} done.')
             ok_count +=1
     return ok_count, fail_count
 
@@ -249,14 +263,15 @@ def export_all(dest_dir):
     for image in Image.query.all():
         filename = image2filename(image)
         filepath = dest_dir/image.group.name/filename if image.group else dest_dir/filename
+        filepath = assert_safe_filepath(filepath)
         try:
             with open(filepath, 'wb') as fh:
                 fh.write(image.data)
         except OSError:
-            print(f'Error: {filename} write failed.')
+            print(f'Error: {filepath} write failed.')
             fail_count += 1
         else:
-            print(f'export {filename} done.')
+            print(f'export {filepath} done.')
             ok_count +=1
     return ok_count, fail_count
 
