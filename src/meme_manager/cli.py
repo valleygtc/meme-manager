@@ -8,7 +8,7 @@ from waitress import serve
 
 from .version import __version__
 from .create_app import create_app
-from .models import db, Image
+from .models import db, Image, Group
 
 
 @click.group()
@@ -68,17 +68,28 @@ def import_from_dir(src_path):
     Params:
         src_path [Path]
     Return:
-        count [int]
+        groupcount [int], filecount [int]
     """
-    count = 0
-    for file in src_path.iterdir():
-        if file.is_file():
-            count += 1
-            record = file2record(file)
+    gcount = 0
+    fcount = 0
+    for path in src_path.iterdir():
+        if path.is_file():
+            fcount += 1
+            record = file2record(path)
             db.session.add(record)
-            print(f'Add {file} done.')
+            print(f'Add {path} done.')
+        elif path.is_dir():
+            gcount += 1
+            group = Group(name=path.name)
+            print(f'Parse Group {group.name}')
+            for f in path.iterdir():
+                fcount += 1
+                image = file2record(f)
+                group.images.append(image)
+                print(f'Add {f} done.')
+            db.session.add(group)
     db.session.commit()
-    return count
+    return gcount, fcount
 
 
 @cli.command('import')
@@ -105,8 +116,8 @@ def import_(src, db_file):
             print(f'Add image {src_path} done.')
     elif src_path.is_dir():
         with app.app_context():
-            count = import_from_dir(src_path)
-            print(f'Total add {count} images.')
+            gcount, fcount = import_from_dir(src_path)
+            print(f'Total add {gcount} group, {fcount} images.')
     else:
         print(f'Error: {src_path} is not a regular file nor a directory.')
         return

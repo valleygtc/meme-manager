@@ -41,13 +41,28 @@ class TestImport(unittest.TestCase):
             self.assertEqual(result.exit_code, 0)
             self.assertIn('done', result.output)
 
-    def test_import_dir_normal(self):
+    def test_import_dir_contain_files(self):
         runner = CliRunner()
         with runner.isolated_filesystem():
             runner.invoke(cli, ['initdb', 'testdb.sqlite'])
             Path('testdir').mkdir()
             Path('testdir/img1.jpg').touch()
             Path('testdir/img2.jpg').touch()
+            result = runner.invoke(cli, ['import', 'testdir', 'testdb.sqlite'])
+            self.assertEqual(result.exit_code, 0)
+
+    def test_import_dir_contain_dirs_and_files(self):
+        runner = CliRunner()
+        with runner.isolated_filesystem():
+            runner.invoke(cli, ['initdb', 'testdb.sqlite'])
+            Path('testdir').mkdir()
+            Path('testdir/group1').mkdir()
+            Path('testdir/group1/img1.jpg').touch()
+            Path('testdir/group1/img2.jpg').touch()
+            Path('testdir/group2').mkdir()
+            Path('testdir/group2/img1.jpg').touch()
+            Path('testdir/group2/img2.jpg').touch()
+            Path('testdir/img1.jpg').touch()
             result = runner.invoke(cli, ['import', 'testdir', 'testdb.sqlite'])
             self.assertEqual(result.exit_code, 0)
     
