@@ -76,7 +76,7 @@ def show_images():
         paginate = query.order_by(Image.create_at)\
                         .paginate(page=page, per_page=per_page)
 
-        columns = ('id', 'img_type', 'tags', 'create_at')
+        columns = ('id', 'img_type', 'tags', 'group', 'create_at')
 
         response = {
             'data': [record.readyToJSON(columns, DATETIME_FORMAT) for record in paginate.items],

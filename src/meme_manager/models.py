@@ -34,6 +34,8 @@ class Image(db.Model):
                 v = getattr(self, k).strftime(datetime_format)
             elif k == 'tags':
                 v = getattr(self, k).split(',')
+            elif k == 'group':
+                v = self.group.name if self.group else None
             else:
                 v = getattr(self, k)
             d[k] = v
