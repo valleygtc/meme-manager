@@ -171,10 +171,101 @@ def import_(group, src, db_file):
         return
 
 
+def image2filename(image):
+    """
+    Params:
+        image [Image]:
+    Return:
+        filename [str]
+    """
+    filename = image.tags.split(',')[0] or str(uuid.uuid4())
+    filename += f'.{image.img_type}'
+    return filename
+
+
+def export_group(dest_dir, group):
+    """
+    Params:
+        dest_dir [Path]:
+        group [str]:
+    Return:
+        ok_count, fail_count
+    """
+    grecord = Group.query.filter_by(name=group).first()
+    if not grecord:
+        print(f'Error: group {group} not exists.')
+        return
+
+    group_dir = dest_dir/group
+    if group_dir.exists():
+        print(f'Error: {group_dir} already exists.')
+        return
+
+    try:
+        group_dir.mkdir()
+    except OSError as e:
+        print(f'Error: {e}')
+        return
+
+    ok_count = 0
+    fail_count = 0
+    for image in grecord.images:
+        filename = image2filename(image)
+        filepath = group_dir/filename
+        try:
+            with open(filepath, 'wb') as fh:
+                fh.write(image.data)
+        except OSError:
+            print(f'Error: {filename} write failed.')
+            fail_count += 1
+        else:
+            print(f'export {filename} done.')
+            ok_count +=1
+    return ok_count, fail_count
+
+
+def export_all(dest_dir):
+    """
+    Params:
+        dest_dir [Path]:
+    Return:
+        ok_count, fail_count
+    """
+    # groups
+    for group in Group.query.all():
+        group_dir = dest_dir/group.name
+        if group_dir.exists():
+            print(f'Error: {group_dir} already exists.')
+            return
+
+        try:
+            group_dir.mkdir()
+        except OSError as e:
+            print(f'Error: {e}')
+
+    # images
+    ok_count = 0
+    fail_count = 0
+    for image in Image.query.all():
+        filename = image2filename(image)
+        filepath = dest_dir/image.group.name/filename if image.group else dest_dir/filename
+        try:
+            with open(filepath, 'wb') as fh:
+                fh.write(image.data)
+        except OSError:
+            print(f'Error: {filename} write failed.')
+            fail_count += 1
+        else:
+            print(f'export {filename} done.')
+            ok_count +=1
+    return ok_count, fail_count
+
+
 @cli.command('export')
+@click.option('-g', '--group', help='Specify group.')
 @click.argument('db_file')
 @click.argument('dest')
-def export_(db_file, dest):
+def export_(group, db_file, dest):
     """Export db images to a directory."""
     db_path = Path(db_file).resolve().absolute()
     dest_path = Path(dest)
@@ -190,35 +281,14 @@ def export_(db_file, dest):
 
     app = create_app(os.getenv('FLASK_ENV', 'production'))
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
-    ok_count = 0
-    fail_count = 0
     with app.app_context():
-        # groups
-        for group in Group.query.all():
-            dir_ = dest_path/group.name
-            if dir_.exists():
-                print(f'Error: {dir_} already exists.')
-                return
+        if group:
+            # export -g <dir>
+            ok_count, fail_count = export_group(dest_path, group)
+        else:
+            # export <dir>
+            ok_count, fail_count = export_all(dest_path)
 
-            try:
-                dir_.mkdir()
-            except OSError as e:
-                print(f'Error: {e}')
-
-        # images
-        for image in Image.query.all():
-            filename = image.tags.split(',')[0] or str(uuid.uuid4())
-            filename += f'.{image.img_type}'
-            filepath = dest_path/image.group.name/filename if image.group else dest_path/filename
-            try:
-                with open(filepath, 'wb') as fh:
-                    fh.write(image.data)
-            except OSError:
-                print(f'Error: {filename} write failed.')
-                fail_count += 1
-            else:
-                print(f'export {filename} done.')
-                ok_count +=1
     print(f'Total export {ok_count + fail_count} images.')
     print(f'Success: {ok_count}')
     print(f'Failed: {fail_count}')

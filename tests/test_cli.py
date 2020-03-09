@@ -93,10 +93,19 @@ class TestImport(unittest.TestCase):
 
 
 class TestExport(unittest.TestCase):
-    def test_normal(self):
+    def test_export_all(self):
         runner = CliRunner()
         with runner.isolated_filesystem():
             runner.invoke(cli, ['initdb', 'testdb.sqlite'])
             Path('testdir').mkdir()
             result = runner.invoke(cli, ['export', 'testdb.sqlite', 'testdir'])
             self.assertEqual(result.exit_code, 0)
+    
+    # TODO: 得想法子搞定单元测试的 setUp tearDown 数据库初始化。
+    # def test_export_group(self):
+    #     runner = CliRunner()
+    #     with runner.isolated_filesystem():
+    #         runner.invoke(cli, ['initdb', 'testdb.sqlite'])
+    #         Path('testdir').mkdir()
+    #         result = runner.invoke(cli, ['export', '--group', 'testGroup', 'testdb.sqlite', 'testdir'])
+    #         self.assertEqual(result.exit_code, 0)
