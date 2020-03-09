@@ -49,53 +49,93 @@ def run(port, db_file):
     serve(app, host='127.0.0.1', port=port)
 
 
-def file2record(file):
+def file2image(file, group_id=None):
     """
     Params:
         file [Path]
     Return:
-        record [Image]
+        image [Image]
     """
+    if not file.is_file():
+        raise Exception(f'file2image parameter {file} must be a regular file.')
+
     return Image(
         data=file.read_bytes(),
         img_type=file.suffix[1:],
         tags=file.stem,
+        group_id=group_id,
     )
 
 
-def import_from_dir(src_path):
+def assert_group(name):
     """
     Params:
-        src_path [Path]
+        name [str]
     Return:
-        groupcount [int], filecount [int]
+        group_id [int]
+    """
+    record = Group.query.filter_by(name=name).first()
+    if record:
+        return record.id
+    else:
+        group = Group(name=name)
+        db.session.add(group)
+        db.session.flush()
+        return group.id
+
+
+def import_flat_dir(dir_, group):
+    """
+    Params:
+        dir_ [Path]
+        group [str]
+    Return:
+        count [int]: images num.
+    """
+    print(f'Group: {group}')
+    count = 0
+    group_id = assert_group(group)
+    
+    for f in dir_.iterdir():
+        if f.is_file():
+            image = file2image(f, group_id)
+            db.session.add(image)
+            count += 1
+            print(f'Add image {f} done.')
+    db.session.commit()
+    return count
+
+
+def import_struct_dir(dir_):
+    """
+    Params:
+        dir_ [Path]
+        group [str]
+    Return:
+        group_count [int], file_count [int]
     """
     gcount = 0
     fcount = 0
-    for path in src_path.iterdir():
-        if path.is_file():
+    for p in dir_.iterdir():
+        if p.is_file():
+            image = file2image(p)
+            db.session.add(image)
             fcount += 1
-            record = file2record(path)
-            db.session.add(record)
-            print(f'Add {path} done.')
-        elif path.is_dir():
+            print(f'Add image {p} done.')
+        elif p.is_dir():
+            print(f'Group: {p.name}')
+            fc = import_flat_dir(p, p.name)
             gcount += 1
-            group = Group(name=path.name)
-            print(f'Parse Group {group.name}')
-            for f in path.iterdir():
-                fcount += 1
-                image = file2record(f)
-                group.images.append(image)
-                print(f'Add {f} done.')
-            db.session.add(group)
+            fcount += fc
     db.session.commit()
     return gcount, fcount
 
 
 @cli.command('import')
+@click.option('-g', '--group', help='Set group.')
 @click.argument('src')
 @click.argument('db_file')
-def import_(src, db_file):
+def import_(group, src, db_file):
     """Import image file or directory."""
     src_path = Path(src)
     db_path = Path(db_file).resolve().absolute()
@@ -110,14 +150,23 @@ def import_(src, db_file):
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     if src_path.is_file():
         with app.app_context():
-            record = file2record(src_path)
-            db.session.add(record)
+            # import <file>
+            # import -g <file>
+            group_id = assert_group(group) if group else None
+            image = file2image(src_path, group_id)
+            db.session.add(image)
             db.session.commit()
             print(f'Add image {src_path} done.')
     elif src_path.is_dir():
         with app.app_context():
-            gcount, fcount = import_from_dir(src_path)
-            print(f'Total add {gcount} group, {fcount} images.')
+            if group:
+                # import -g <dir>: import dir only contain files.
+                fcount = import_flat_dir(src_path, group)
+                print(f'Total add {fcount} images.')
+            else:
+                # import <dir>: import dir contain files and dirs.
+                gcount, fcount = import_struct_dir(src_path)
+                print(f'Total add {gcount} group, {fcount} images.')
     else:
         print(f'Error: {src_path} is not a regular file nor a directory.')
         return

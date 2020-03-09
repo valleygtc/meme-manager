@@ -32,7 +32,7 @@ class TestInitdb(unittest.TestCase):
 
 
 class TestImport(unittest.TestCase):
-    def test_import_file_normal(self):
+    def test_import_file_default(self):
         runner = CliRunner()
         with runner.isolated_filesystem():
             runner.invoke(cli, ['initdb', 'testdb.sqlite'])
@@ -40,18 +40,27 @@ class TestImport(unittest.TestCase):
             result = runner.invoke(cli, ['import', 'testimage.jpg', 'testdb.sqlite'])
             self.assertEqual(result.exit_code, 0)
             self.assertIn('done', result.output)
+    
+    def test_import_file_with_group_option(self):
+        runner = CliRunner()
+        with runner.isolated_filesystem():
+            runner.invoke(cli, ['initdb', 'testdb.sqlite'])
+            Path('testimage.jpg').touch()
+            result = runner.invoke(cli, ['import', '--group', 'testGroup', 'testimage.jpg', 'testdb.sqlite'])
+            self.assertEqual(result.exit_code, 0)
+            self.assertIn('done', result.output)
 
-    def test_import_dir_contain_files(self):
+    def test_import_flat_dir(self):
         runner = CliRunner()
         with runner.isolated_filesystem():
             runner.invoke(cli, ['initdb', 'testdb.sqlite'])
             Path('testdir').mkdir()
             Path('testdir/img1.jpg').touch()
             Path('testdir/img2.jpg').touch()
-            result = runner.invoke(cli, ['import', 'testdir', 'testdb.sqlite'])
+            result = runner.invoke(cli, ['import', '--group', 'testGroup', 'testdir', 'testdb.sqlite'])
             self.assertEqual(result.exit_code, 0)
-
-    def test_import_dir_contain_dirs_and_files(self):
+    
+    def test_import_struct_dir(self):
         runner = CliRunner()
         with runner.isolated_filesystem():
             runner.invoke(cli, ['initdb', 'testdb.sqlite'])
