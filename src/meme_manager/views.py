@@ -25,13 +25,15 @@ GET
 - per_page：可选，默认为 20。
 搜索：后端实现，使用 url 参数，可搜索项：tag。
 - tag: [str]
+- group: [str]
 resp: 200, body:
 {
     "data": [
         {
             "id": [Number],
-            "img_type": [String]
+            "img_type": [String],
             "tags": [Array[String]],
+            "group": [String] or [null],
             "create_at": [String]
         },
         ...
@@ -58,11 +60,15 @@ def show_images():
         return response
     else:
         # apply search
+        group = request.args.get('group')
         tag = request.args.get('tag')
-        if tag:
-            query = Image.query.filter(Image.tags.contains(tag))
+        if group:
+            query = Image.query.join(Image.group).filter(Group.name == group)
         else:
             query = Image.query
+
+        if tag:
+            query = query.filter(Image.tags.contains(tag))
         # apply pagination
         DEFAULT_PER_PAGE = 20
         page = int(request.args.get('page', default=1))

@@ -2,7 +2,7 @@ import unittest
 import json
 from io import BytesIO
 
-from meme_manager import db, Image
+from meme_manager import db, Image, Group
 
 from tests import test_app
 
@@ -58,6 +58,76 @@ class TestImageShow(unittest.TestCase):
         self.assertIn('data', json_data)
         self.assertIn('pagination', json_data)
         self.assertEqual(len(json_data['data']), 10)
+
+
+class TestImageSearch(unittest.TestCase):
+    url = '/api/images/'
+
+    def setUp(self):
+        with test_app.app_context():
+            db.create_all()
+            group = Group(
+                name=f'testGroup',
+            )
+            img1 = Image(
+                data=b'abcdefggggggg',
+                img_type='jpeg',
+                tags='aTag',
+            )
+            img2 = Image(
+                data=b'abcdefggggggg',
+                img_type='jpeg',
+                tags='bTag',
+            )
+            group.images = [img1, img2]
+            db.session.add(group)
+            img3 = Image(
+                data=b'abcdefggggggg',
+                img_type='jpeg',
+                tags='cTag',
+            )
+            db.session.add(img3)
+            db.session.commit()
+    
+    def tearDown(self):
+        with test_app.app_context():
+            db.drop_all()
+    
+    def test_search_tag(self):
+        client = test_app.test_client()
+        resp = client.get(
+            self.url,
+            query_string={'tag': 'aTag'}
+        )
+        self.assertEqual(resp.status_code, 200)
+        json_data = resp.get_json()
+        self.assertIn('data', json_data)
+        self.assertEqual(len(json_data['data']), 1)
+
+    def test_search_group(self):
+        client = test_app.test_client()
+        resp = client.get(
+            self.url,
+            query_string={'group': 'testGroup'}
+        )
+        self.assertEqual(resp.status_code, 200)
+        json_data = resp.get_json()
+        self.assertIn('data', json_data)
+        self.assertEqual(len(json_data['data']), 2)
+    
+    def test_search_tag_within_group(self):
+        client = test_app.test_client()
+        resp = client.get(
+            self.url,
+            query_string={
+                'group': 'testGroup',
+                'tag': 'aTag',
+            }
+        )
+        self.assertEqual(resp.status_code, 200)
+        json_data = resp.get_json()
+        self.assertIn('data', json_data)
+        self.assertEqual(len(json_data['data']), 1)
 
 
 class TestImageAdd(unittest.TestCase):
