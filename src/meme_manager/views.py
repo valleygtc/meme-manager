@@ -243,42 +243,42 @@ def add_group():
 
 """/groups/delete
 POST {
-    "id": [Number],
+    "name": [String],
 }
 resp: 200, body: {"msg": [String]}
 """
 @bp_main.route('/api/groups/delete', methods=['POST'])
 def delete_group():
     data = request.get_json()
-    id_ = data['id']
-    group = Group.query.get(id_)
-    if group is None:
-        err = f'组（id={id_}）不存在，可能是其已被删除，请刷新页面。'
+    name = data['name']
+    record = Group.query.filter_by(name=name).first()
+    if record is None:
+        err = f'组（name={name}）不存在，可能是其已被删除，请刷新页面。'
         return jsonify({
             'error': err
         }), 404
     else:
-        db.session.delete(group)
+        db.session.delete(record)
         db.session.commit()
         return jsonify({
-            'msg': f'成功删除组（id={id_}）'
+            'msg': f'成功删除组（name={name}）'
         })
 
 
 """/groups/update
 POST {
-    "id": [Number],
-    "name": [String]
+    "name": [String],
+    "new_name": [String]
 }
 resp: 200, body: {"msg": [String]}
 """
 @bp_main.route('/api/groups/update', methods=['POST'])
 def update_group():
     data = request.get_json()
-    id_ = data['id']
-    group = Group.query.get(id_)
-    group.name = data['name']
+    name = data['name']
+    record = Group.query.filter_by(name=name).first()
+    record.name = data['new_name']
     db.session.commit()
     return jsonify({
-        'msg': f'成功更新组：{group}'
+        'msg': f'成功更新组：{record}'
     })

@@ -7,7 +7,7 @@ from tests import test_app
 
 
 def fake_records(n):
-    for i in range(n):
+    for i in range(1, n+1):
         group = Group(
             name=f'testGroup{i}',
         )
@@ -92,14 +92,14 @@ class TestGroupDelete(unittest.TestCase):
         client = test_app.test_client()
         resp = client.post(
             self.url,
-            json={'id': 1}
+            json={'name': 'testGroup1'}
         )
         self.assertEqual(resp.status_code, 200)
         json_data = resp.get_json()
         self.assertIn('msg', json_data)
         # 验证数据库中已删除
         with test_app.app_context():
-            self.assertFalse(Group.query.get(1))
+            self.assertFalse(Group.query.filter_by(name='testGroup1').first())
             # 验证 cascade delete：
             self.assertFalse(Image.query.get(1))
             self.assertFalse(Image.query.get(2))
@@ -108,7 +108,7 @@ class TestGroupDelete(unittest.TestCase):
         client = test_app.test_client()
         resp = client.post(
             self.url,
-            json={'id': 10000}
+            json={'name': 'not_exists_group'}
         )
         self.assertEqual(resp.status_code, 404)
         json_data = resp.get_json()
@@ -119,8 +119,8 @@ class TestGroupUpdate(unittest.TestCase):
     url = '/api/groups/update'
 
     data = {
-        'id': 1,
-        'name': 'updatedGroup',
+        'name': 'testGroup1',
+        'new_name': 'updatedGroup',
     }
 
     def setUp(self):
@@ -144,5 +144,5 @@ class TestGroupUpdate(unittest.TestCase):
         self.assertIn('msg', json_data)
         # 验证数据库中确实已经更新
         with test_app.app_context():
-            record = Group.query.get(self.data['id'])
-            self.assertEqual(record.name, self.data['name'])
+            record = Group.query.get(1)
+            self.assertEqual(record.name, self.data['new_name'])
