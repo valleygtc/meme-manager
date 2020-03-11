@@ -159,18 +159,25 @@ def update_image():
         }), 404
     
     group_name = data['group']
-    group = Group.query.filter_by(name=group_name).first()
-    if group is None:
-        err = f'组（name={group_name}）不存在。'
+    if group_name is None:
+        image.group_id = None
+        db.session.commit()
         return jsonify({
-            'error': err
-        }), 404
-    
-    image.group = group
-    db.session.commit()
-    return jsonify({
-        'msg': f'成功将图片（id={image_id}）移植组（name={group_name}）'
-    })
+            'msg': f'成功将图片（id={image_id}）移至组（全部））'
+        })
+    else:
+        group = Group.query.filter_by(name=group_name).first()
+        if group is None:
+            err = f'组（name={group_name}）不存在。'
+            return jsonify({
+                'error': err
+            }), 404
+
+        image.group = group
+        db.session.commit()
+        return jsonify({
+            'msg': f'成功将图片（id={image_id}）移至组（name={group_name}）'
+        })
 
 
 # tags

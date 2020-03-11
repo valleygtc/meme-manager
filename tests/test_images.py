@@ -265,3 +265,21 @@ class TestImageUpdate(unittest.TestCase):
         self.assertEqual(resp.status_code, 404)
         json_data = resp.get_json()
         self.assertIn('error', json_data)
+    
+    def test_move_to_all(self):
+        client = test_app.test_client()
+        resp = client.post(
+            self.url,
+            json={
+                'id': 2,
+                'group': None,
+            }
+        )
+        self.assertEqual(resp.status_code, 200)
+        json_data = resp.get_json()
+        self.assertIn('msg', json_data)
+        with test_app.app_context():
+            self.assertIs(
+                Image.query.get(2).group_id,
+                None,
+            )
