@@ -182,6 +182,37 @@ class TestImageAdd(unittest.TestCase):
         # 验证已插入数据库
         with test_app.app_context():
             self.assertTrue(Image.query.get(1))
+    
+    def test_with_group(self):
+        # setup
+        with test_app.app_context():
+            group = Group(
+                name=f'testGroup',
+            )
+            db.session.add(group)
+            db.session.commit()
+        
+        # test
+        client = test_app.test_client()
+        resp = client.post(
+            self.url,
+            data={
+                'image': (BytesIO(b'added image data'), 'test_image.jpeg'),
+                'metadata': json.dumps({
+                    'img_type': 'jpeg',
+                    'tags': ['aTag', 'bTag'],
+                    'group': 'testGroup',
+                })
+            }
+        )
+        self.assertEqual(resp.status_code, 200)
+        json_data = resp.get_json()
+        self.assertIn('msg', json_data)
+        # 验证已插入数据库
+        with test_app.app_context():
+            image = Image.query.get(1)
+            self.assertTrue(image)
+            self.assertEqual(image.group.name, 'testGroup')
 
 
 class TestImageDelete(unittest.TestCase):

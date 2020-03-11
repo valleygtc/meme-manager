@@ -97,7 +97,8 @@ Content-Type: multipart/form-data
 "image": [bytes-file],
 "metadata": [JSON-String] {
     "img_type": [String],
-    "tags": [Array[String]]
+    "tags": [Array[String]]，
+    "group" [Optional]: [String] | Null,
 }
 resp: 200, body: {"msg": [String]}
 """
@@ -112,6 +113,17 @@ def add_image():
         img_type=metadata['img_type'],
         tags=','.join(metadata['tags']),
     )
+    group_name = metadata.get('group')
+    if group_name is not None:
+        group = Group.query.filter_by(name=group_name).first()
+        if group is None:
+            err = f'组（name={group_name}）不存在。'
+            return jsonify({
+                'error': err
+            }), 400
+
+        record.group = group
+
     db.session.add(record)
     db.session.commit()
     return jsonify({
