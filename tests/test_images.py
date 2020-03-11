@@ -7,7 +7,27 @@ from meme_manager import db, Image, Group
 from tests import test_app
 
 
-def fake_records(n):
+def fake_groups(n):
+    for i in range(1, n+1):
+        group = Group(
+            name=f'testGroup{i}',
+        )
+        img1 = Image(
+            data=b'abcdefggggggg',
+            img_type='jpeg',
+            tags='aTag,bTag'
+        )
+        img2 = Image(
+            data=b'abcdefggggggg',
+            img_type='jpeg',
+            tags='aTag,bTag'
+        )
+        group.images = [img1, img2]
+        db.session.add(group)
+    db.session.commit()
+
+
+def fake_images(n):
     for i in range(n):
         img = Image(
             data=b'abcdefggggggg',
@@ -24,7 +44,7 @@ class TestImageShow(unittest.TestCase):
     def setUp(self):
         with test_app.app_context():
             db.create_all()
-            fake_records(20)
+            fake_images(20)
     
     def tearDown(self):
         with test_app.app_context():
@@ -170,7 +190,7 @@ class TestImageDelete(unittest.TestCase):
     def setUp(self):
         with test_app.app_context():
             db.create_all()
-            fake_records(1)
+            fake_images(1)
     
     def tearDown(self):
         with test_app.app_context():
@@ -194,6 +214,53 @@ class TestImageDelete(unittest.TestCase):
         resp = client.get(
             self.url,
             query_string={'id': 10000}
+        )
+        self.assertEqual(resp.status_code, 404)
+        json_data = resp.get_json()
+        self.assertIn('error', json_data)
+
+
+class TestImageUpdate(unittest.TestCase):
+    url = '/api/images/update'
+
+    data = {
+        'id': 1,
+        'group': 'testGroup1',
+    }
+
+    def setUp(self):
+        with test_app.app_context():
+            db.create_all()
+            fake_images(1)
+            fake_groups(1)
+    
+    def tearDown(self):
+        with test_app.app_context():
+            db.drop_all()
+
+    def test_normal(self):
+        client = test_app.test_client()
+        body = self.data.copy()
+        resp = client.post(
+            self.url,
+            json=body
+        )
+        self.assertEqual(resp.status_code, 200)
+        json_data = resp.get_json()
+        self.assertIn('msg', json_data)
+        with test_app.app_context():
+            self.assertEqual(
+                Image.query.get(1).group.name,
+                'testGroup1',
+            )
+
+    def test_move_to_not_exists_group(self):
+        client = test_app.test_client()
+        body = self.data.copy()
+        body['group'] = 'notExistsGroup'
+        resp = client.post(
+            self.url,
+            json=body
         )
         self.assertEqual(resp.status_code, 404)
         json_data = resp.get_json()
