@@ -33,7 +33,8 @@ class Image(db.Model):
             if k == 'create_at':
                 v = getattr(self, k).strftime(datetime_format)
             elif k == 'tags':
-                v = getattr(self, k).split(',')
+                tags = getattr(self, k)
+                v = tags.split(',') if tags else []
             elif k == 'group':
                 v = self.group.name if self.group else None
             else:

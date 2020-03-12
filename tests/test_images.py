@@ -153,14 +153,6 @@ class TestImageSearch(unittest.TestCase):
 class TestImageAdd(unittest.TestCase):
     url = '/api/images/add'
 
-    data = {
-        'image': (BytesIO(b'added image data'), 'test_image.jpeg'),
-        'metadata': json.dumps({
-            'img_type': 'jpeg',
-            'tags': ['aTag', 'bTag']
-        })
-    }
-
     def setUp(self):
         with test_app.app_context():
             db.create_all()
@@ -168,13 +160,39 @@ class TestImageAdd(unittest.TestCase):
     def tearDown(self):
         with test_app.app_context():
             db.drop_all()
-
-    def test_default(self):
+    
+    def test_blank_tags(self):
         client = test_app.test_client()
-        body = self.data.copy()
         resp = client.post(
             self.url,
-            data=body
+            data={
+                'image': (BytesIO(b'added image data'), 'test_image.jpeg'),
+                'metadata': json.dumps({
+                    'img_type': 'jpeg',
+                    'tags': [],
+                })
+            }
+        )
+        self.assertEqual(resp.status_code, 200)
+        json_data = resp.get_json()
+        self.assertIn('msg', json_data)
+        # 验证已插入数据库
+        with test_app.app_context():
+            record = Image.query.get(1)
+            self.assertTrue(record)
+            self.assertEqual(record.tags, '')
+
+    def test_with_tags(self):
+        client = test_app.test_client()
+        resp = client.post(
+            self.url,
+            data={
+                'image': (BytesIO(b'added image data'), 'test_image.jpeg'),
+                'metadata': json.dumps({
+                    'img_type': 'jpeg',
+                    'tags': ['aTag', 'bTag'],
+                })
+            }
         )
         self.assertEqual(resp.status_code, 200)
         json_data = resp.get_json()
