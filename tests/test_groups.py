@@ -14,12 +14,12 @@ def fake_records(n):
         img1 = Image(
             data=b'abcdefggggggg',
             img_type='jpeg',
-            tags='aTag,bTag'
+            tags=['aTag', 'bTag']
         )
         img2 = Image(
             data=b'abcdefggggggg',
             img_type='jpeg',
-            tags='aTag,bTag'
+            tags=['aTag', 'bTag']
         )
         group.images = [img1, img2]
         db.session.add(group)

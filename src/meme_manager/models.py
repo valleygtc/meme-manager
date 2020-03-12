@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, operators
+from sqlalchemy import String
 import sqlalchemy.types as types
 
 db = SQLAlchemy()
@@ -10,6 +11,13 @@ class Array(types.TypeDecorator):
     """
 
     impl = types.Text
+
+    def coerce_compared_value(self, op, value):
+        # support <column>.contains(<str>)
+        if op in (operators.contains_op, operators.like_op, operators.notlike_op):
+            return String()
+        else:
+            return self
 
     def process_bind_param(self, value, dialect):
         """

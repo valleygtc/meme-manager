@@ -15,12 +15,12 @@ def fake_groups(n):
         img1 = Image(
             data=b'abcdefggggggg',
             img_type='jpeg',
-            tags='aTag,bTag'
+            tags=['aTag', 'bTag']
         )
         img2 = Image(
             data=b'abcdefggggggg',
             img_type='jpeg',
-            tags='aTag,bTag'
+            tags=['aTag', 'bTag']
         )
         group.images = [img1, img2]
         db.session.add(group)
@@ -32,7 +32,7 @@ def fake_images(n):
         img = Image(
             data=b'abcdefggggggg',
             img_type='jpeg',
-            tags='aTag,bTag'
+            tags=['aTag', 'bTag']
         )
         db.session.add(img)
     db.session.commit()
@@ -92,19 +92,19 @@ class TestImageSearch(unittest.TestCase):
             img1 = Image(
                 data=b'abcdefggggggg',
                 img_type='jpeg',
-                tags='aTag',
+                tags=['aTag'],
             )
             img2 = Image(
                 data=b'abcdefggggggg',
                 img_type='jpeg',
-                tags='bTag',
+                tags=['bTag'],
             )
             group.images = [img1, img2]
             db.session.add(group)
             img3 = Image(
                 data=b'abcdefggggggg',
                 img_type='jpeg',
-                tags='cTag',
+                tags=['cTag'],
             )
             db.session.add(img3)
             db.session.commit()

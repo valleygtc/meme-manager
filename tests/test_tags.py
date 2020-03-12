@@ -12,7 +12,7 @@ def fake_records(n):
         img = Image(
             data=b'abcdefggggggg',
             img_type='jpeg',
-            tags='aTag,bTag'
+            tags=['aTag', 'bTag'],
         )
         db.session.add(img)
     db.session.commit()
