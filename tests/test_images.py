@@ -180,7 +180,7 @@ class TestImageAdd(unittest.TestCase):
         with test_app.app_context():
             record = Image.query.get(1)
             self.assertTrue(record)
-            self.assertEqual(record.tags, '')
+            self.assertEqual(record.tags, [])
 
     def test_with_tags(self):
         client = test_app.test_client()

@@ -111,7 +111,7 @@ def add_image():
     record = Image(
         data=image_data,
         img_type=metadata['img_type'],
-        tags=','.join(metadata['tags']),
+        tags=metadata['tags'],
     )
     group_name = metadata.get('group')
     if group_name is not None:
@@ -211,7 +211,7 @@ def show_tags():
         }), 404
 
     response = {
-        'data': image.tags.split(','),
+        'data': image.tags,
     }
     return jsonify(response)
 
@@ -229,7 +229,7 @@ def add_tags():
     image_id = data['image_id']
     image = Image.query.get(image_id)
     if data['tags']:
-        image.tags += (',' + ','.join(data['tags']))
+        image.tags = [*image.tags, *data['tags']]
         db.session.commit()
 
     return jsonify({
@@ -249,9 +249,7 @@ def delete_tag():
     data = request.get_json()
     image_id = data['image_id']
     image = Image.query.get(image_id)
-    new_tags = image.tags.split(',')
-    new_tags.remove(data['tag'])
-    image.tags = ','.join(new_tags)
+    image.tags = list(t for t in image.tags if t != data['tag'])
     db.session.commit()
     return jsonify({
         'msg': f'成功删除标签：{data}'
