@@ -62,7 +62,7 @@ def file2image(file, group_id=None):
     return Image(
         data=file.read_bytes(),
         img_type=file.suffix[1:],
-        tags=file.stem,
+        tags=[file.stem],
         group_id=group_id,
     )
 
@@ -178,7 +178,7 @@ def image2filename(image):
     Return:
         filename [str]
     """
-    filename = image.tags.split(',')[0] or str(uuid.uuid4())
+    filename = image.tags[0] if image.tags else str(uuid.uuid4())
     filename += f'.{image.img_type}'
     return filename
 
