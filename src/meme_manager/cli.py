@@ -171,14 +171,20 @@ def import_(group, src, db_file):
         return
 
 
-def image2filename(image):
+def image2filename(image, name_pattern):
     """
     Params:
         image [Image]:
+        name_pattern [str]
     Return:
         filename [str]
     """
-    filename = image.tags[0] if image.tags else str(uuid.uuid4())
+    if name_pattern == 'tag':
+        filename = image.tags[0] if image.tags else str(uuid.uuid4())
+    elif name_pattern == 'id':
+        filename = str(image.id)
+    else:
+        raise ValueError(f'name_pattern "{name_pattern}" is not suppported')
     filename += f'.{image.img_type}'
     return filename
 
@@ -196,11 +202,12 @@ def assert_safe_filepath(filepath):
         return filepath
 
 
-def export_group(dest_dir, group):
+def export_group(dest_dir, group, name_pattern):
     """
     Params:
         dest_dir [Path]:
         group [str]:
+        name_pattern [str]
     Return:
         ok_count, fail_count
     """
@@ -223,7 +230,7 @@ def export_group(dest_dir, group):
     ok_count = 0
     fail_count = 0
     for image in grecord.images:
-        filename = image2filename(image)
+        filename = image2filename(image, name_pattern)
         filepath = group_dir/filename
         filepath = assert_safe_filepath(filepath)
         try:
@@ -238,10 +245,11 @@ def export_group(dest_dir, group):
     return ok_count, fail_count
 
 
-def export_all(dest_dir):
+def export_all(dest_dir, name_pattern):
     """
     Params:
         dest_dir [Path]:
+        name_pattern [str]:
     Return:
         ok_count, fail_count
     """
@@ -261,7 +269,7 @@ def export_all(dest_dir):
     ok_count = 0
     fail_count = 0
     for image in Image.query.all():
-        filename = image2filename(image)
+        filename = image2filename(image, name_pattern)
         filepath = dest_dir/image.group.name/filename if image.group else dest_dir/filename
         filepath = assert_safe_filepath(filepath)
         try:
@@ -278,12 +286,19 @@ def export_all(dest_dir):
 
 @cli.command('export')
 @click.option('-g', '--group', help='Specify group.')
+@click.option('--name-pattern',default='tag',
+    help='Specify export filename pattern: tag(default), id.'
+)
 @click.argument('db_file')
 @click.argument('dest')
-def export_(group, db_file, dest):
+def export_(group, name_pattern, db_file, dest):
     """Export db images to a directory."""
     db_path = Path(db_file).resolve().absolute()
     dest_path = Path(dest)
+    support_name_pattern = ('tag', 'id')
+    if not name_pattern in support_name_pattern:
+        print(f'Error: --name-pattern only support {support_name_pattern}, {name_pattern} is illegal.')
+        return
     if not db_path.exists():
         print(f'Error: {db_path} not exists.')
         return
@@ -299,10 +314,10 @@ def export_(group, db_file, dest):
     with app.app_context():
         if group:
             # export -g <dir>
-            ok_count, fail_count = export_group(dest_path, group)
+            ok_count, fail_count = export_group(dest_path, group, name_pattern)
         else:
             # export <dir>
-            ok_count, fail_count = export_all(dest_path)
+            ok_count, fail_count = export_all(dest_path, name_pattern)
 
     print(f'Total export {ok_count + fail_count} images.')
     print(f'Success: {ok_count}')

@@ -109,3 +109,19 @@ class TestExport(unittest.TestCase):
     #         Path('testdir').mkdir()
     #         result = runner.invoke(cli, ['export', '--group', 'testGroup', 'testdb.sqlite', 'testdir'])
     #         self.assertEqual(result.exit_code, 0)
+
+    def test_export_explict_use_tag_as_filename(self):
+        runner = CliRunner()
+        with runner.isolated_filesystem():
+            runner.invoke(cli, ['initdb', 'testdb.sqlite'])
+            Path('testdir').mkdir()
+            result = runner.invoke(cli, ['export', '--name-pattern=tag', 'testdb.sqlite', 'testdir'])
+            self.assertEqual(result.exit_code, 0)
+
+    def test_export_use_id_as_filename(self):
+        runner = CliRunner()
+        with runner.isolated_filesystem():
+            runner.invoke(cli, ['initdb', 'testdb.sqlite'])
+            Path('testdir').mkdir()
+            result = runner.invoke(cli, ['export', '--name-pattern=id', 'testdb.sqlite', 'testdir'])
+            self.assertEqual(result.exit_code, 0)
