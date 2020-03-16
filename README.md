@@ -5,14 +5,20 @@ Web UI 表情包管理器。
 - 浏览图片。
 - 添加、删除图片。
 - 给图片打标签，并可以按标签搜索。
+- 图片分组。
 
 # 安装：
+要求：Python 3.6 及以上。
+
+本软件使用 PyPI 进行分发，所以你可以使用 pip 来安装。但是更建议使用 [pipx](https://github.com/pipxproject/pipx) 将其安装到一个单独的虚拟环境中，避免污染全局系统依赖，如下：
 ```
 $ pipx install meme-manager
 ```
 
 验证安装成功：
-```
+```bash
+$ meme-manager --version
+# 或
 $ meme-manager --help
 ```
 
@@ -24,13 +30,12 @@ $ meme-manager initdb foo.sqlite
 # 运行：
 $ meme-manager run foo.sqlite
 
-# 打开浏览器，在地址栏输入：http://localhost:5000/index.html
+# URL：http://localhost:5000/index.html
 ```
 
 # 开发：
 说明：
-后端使用 Python Flask + waitress 开发。
-前端使用 React + Antd 开发。
+后端使用 Python Flask + waitress，前端使用 React + Antd 开发。
 
 后端：
 ```bash
