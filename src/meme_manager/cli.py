@@ -132,19 +132,12 @@ def import_struct_dir(dir_):
 
 @cli.command('import')
 @click.option('-g', '--group', help='Set group.')
-@click.argument('src')
-@click.argument('db_file')
+@click.argument('src', type=click.Path(exists=True))
+@click.argument('db_file', type=click.Path(exists=True, file_okay=True, dir_okay=False))
 def import_(group, src, db_file):
     """Import image file or directory."""
     src_path = Path(src)
     db_path = Path(db_file).resolve().absolute()
-    if not src_path.exists():
-        print(f'Error: {src_path} not exists.')
-        return
-    if not db_path.exists():
-        print(f'Error: {db_path} not exists.')
-        return
-
     app = create_app(os.getenv('FLASK_ENV', 'production'))
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     if src_path.is_file():
@@ -286,29 +279,16 @@ def export_all(dest_dir, name_pattern):
 
 @cli.command('export')
 @click.option('-g', '--group', help='Specify group.')
-@click.option('--name-pattern',default='tag',
+@click.option('--name-pattern', default='tag',
+    type=click.Choice(('tag', 'id')),
     help='Specify export filename pattern: tag(default), id.'
 )
-@click.argument('db_file')
-@click.argument('dest')
+@click.argument('db_file', type=click.Path(exists=True, file_okay=True, dir_okay=False))
+@click.argument('dest', type=click.Path(exists=True, file_okay=False, dir_okay=True))
 def export_(group, name_pattern, db_file, dest):
     """Export db images to a directory."""
     db_path = Path(db_file).resolve().absolute()
     dest_path = Path(dest)
-    support_name_pattern = ('tag', 'id')
-    if not name_pattern in support_name_pattern:
-        print(f'Error: --name-pattern only support {support_name_pattern}, {name_pattern} is illegal.')
-        return
-    if not db_path.exists():
-        print(f'Error: {db_path} not exists.')
-        return
-    if not dest_path.exists():
-        print(f'Error: {dest_path} not exists.')
-        return
-    if not dest_path.is_dir():
-        print(f'Error: {dest_path} is not a directory.')
-        return
-
     app = create_app(os.getenv('FLASK_ENV', 'production'))
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{db_path}'
     with app.app_context():

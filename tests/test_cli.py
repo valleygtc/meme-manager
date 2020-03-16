@@ -80,7 +80,7 @@ class TestImport(unittest.TestCase):
         with runner.isolated_filesystem():
             runner.invoke(cli, ['initdb', 'testdb.sqlite'])
             result = runner.invoke(cli, ['import', 'notexistsSrc', 'testdb.sqlite'])
-            self.assertEqual(result.exit_code, 0)
+            self.assertNotEqual(result.exit_code, 0)
             self.assertIn('Error', result.output)
     
     def test_import_db_not_exists(self):
@@ -88,7 +88,7 @@ class TestImport(unittest.TestCase):
         with runner.isolated_filesystem():
             Path('testimage.jpg').touch()
             result = runner.invoke(cli, ['import', 'testimage.jpg', 'testdb.sqlite'])
-            self.assertEqual(result.exit_code, 0)
+            self.assertNotEqual(result.exit_code, 0)
             self.assertIn('Error', result.output)
 
 
@@ -101,6 +101,22 @@ class TestExport(unittest.TestCase):
             result = runner.invoke(cli, ['export', 'testdb.sqlite', 'testdir'])
             self.assertEqual(result.exit_code, 0)
     
+    def test_export_db_not_exists(self):
+        runner = CliRunner()
+        with runner.isolated_filesystem():
+            Path('testdir').mkdir()
+            result = runner.invoke(cli, ['export', 'testdb.sqlite', 'testdir'])
+            self.assertNotEqual(result.exit_code, 0)
+            self.assertIn('Error', result.output)
+    
+    def test_export_dest_not_exists(self):
+        runner = CliRunner()
+        with runner.isolated_filesystem():
+            runner.invoke(cli, ['initdb', 'testdb.sqlite'])
+            result = runner.invoke(cli, ['export', 'testdb.sqlite', 'testdir'])
+            self.assertNotEqual(result.exit_code, 0)
+            self.assertIn('Error', result.output)
+    
     # TODO: 得想法子搞定单元测试的 setUp tearDown 数据库初始化。
     # def test_export_group(self):
     #     runner = CliRunner()
@@ -109,6 +125,15 @@ class TestExport(unittest.TestCase):
     #         Path('testdir').mkdir()
     #         result = runner.invoke(cli, ['export', '--group', 'testGroup', 'testdb.sqlite', 'testdir'])
     #         self.assertEqual(result.exit_code, 0)
+
+    def test_export_name_pattern_not_support(self):
+        runner = CliRunner()
+        with runner.isolated_filesystem():
+            runner.invoke(cli, ['initdb', 'testdb.sqlite'])
+            Path('testdir').mkdir()
+            result = runner.invoke(cli, ['export', '--name-pattern=illegalvalue', 'testdb.sqlite', 'testdir'])
+            self.assertNotEqual(result.exit_code, 0)
+            self.assertIn('Error', result.output)
 
     def test_export_explict_use_tag_as_filename(self):
         runner = CliRunner()
