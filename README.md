@@ -63,9 +63,7 @@ $ meme-manager initdb
 $ flask run
 ```
 
-前端：
-
-见：https://github.com/valleygtc/meme-manager-frontend
+前端仓库：[meme-manager-frontend](https://github.com/valleygtc/meme-manager-frontend)
 
 ## 构建与发布：
 prerequsite：
